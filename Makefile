@@ -1,11 +1,18 @@
-VERSION=$(shell git rev-parse --short HEAD)
-IMAGE_PREFIX=jupyter/
+PROJECT=repo2docker
+REPO=registry.rc.nectar.org.au/nectar
 
-build-image:
-	docker build -t $(IMAGE_PREFIX)repo2docker:v$(VERSION) .
+SHA=$(shell git rev-parse --verify --short HEAD)
+TAG_PREFIX=
+IMAGE_TAG := $(if $(TAG),$(TAG),$(TAG_PREFIX)$(SHA))
+IMAGE=$(REPO)/$(PROJECT):$(IMAGE_TAG)
+BUILDER=docker
+BUILDER_ARGS=--no-cache
 
-push-image:
-	docker push $(IMAGE_PREFIX)repo2docker:v$(VERSION)
 
-.all:
-	build-image push-image
+build:
+	$(BUILDER) build $(BUILDER_ARGS) -t $(IMAGE) .
+
+push:
+	$(BUILDER) push $(IMAGE)
+
+.PHONY: build push
